@@ -219,16 +219,22 @@
         .pulse-gold { animation: pulseGlow 2.6s infinite; }
         .pulse-live { animation: pulseGreen 2.2s infinite; }
 
-        /* Scroll Reveal Animation */
+        /* Scroll Reveal Animation: visible by default on mobile/tablet to prevent invisible content */
         .reveal {
-            opacity: 0;
-            transform: translateY(24px);
-            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
-        }
-        .reveal.visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
+        }
+        @media (min-width: 1024px) {
+            .reveal {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                will-change: opacity, transform;
+            }
+            .reveal.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Card Interactive Lift */
@@ -644,7 +650,7 @@
     </section>
 
     <!-- 5. Interactive Services Section with Search & Instant Category Filter -->
-    <section id="services" class="py-14 sm:py-20 max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 reveal">
+    <section id="services" class="py-14 sm:py-20 max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
             <span class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase tracking-wider bg-tnGreen-100 text-tnGreen-800 border border-tnGreen-200" data-i18n="sec_services_badge">
@@ -1285,17 +1291,15 @@
         </div>
     </footer>
 
-    <!-- 14. Floating Back to Top Button (Mobile, Tablet, Laptop, Desktop) -->
-    <button id="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-20 lg:bottom-24 right-4 sm:right-6 z-40 w-11 h-11 rounded-full bg-slate-900/85 hover:bg-slate-900 text-white shadow-xl flex items-center justify-center text-sm transition transform hover:scale-110 border border-white/20 opacity-0 pointer-events-none" title="Back to Top" aria-label="Back to Top">
-        <i class="fa-solid fa-arrow-up"></i>
-    </button>
-
-    <!-- Floating Call & WhatsApp Buttons (Desktop & Laptop) -->
-    <div class="hidden lg:flex fixed bottom-6 right-6 z-40 flex-col space-y-3">
-        <a href="tel:9944719799" class="w-14 h-14 rounded-full bg-tnGreen-700 hover:bg-tnGreen-800 text-white shadow-2xl flex items-center justify-center text-xl transition transform hover:scale-110 border-2 border-white" title="Call 9944719799">
+    <!-- 14. Floating Actions: Back to Top, Call & WhatsApp (Visible on Mobile, Tablet, Laptop, Desktop) -->
+    <div class="fixed bottom-20 lg:bottom-6 right-3 sm:right-6 z-40 flex flex-col space-y-2.5 sm:space-y-3 items-center">
+        <button id="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-xl flex items-center justify-center text-xs sm:text-sm transition transform hover:scale-110 border border-white/20 opacity-0 pointer-events-none" title="Back to Top" aria-label="Back to Top">
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+        <a href="tel:9944719799" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-tnGreen-700 hover:bg-tnGreen-800 text-white shadow-2xl flex items-center justify-center text-lg sm:text-xl transition transform hover:scale-110 border-2 border-white" title="Call 9944719799" aria-label="Call 9944719799">
             <i class="fa-solid fa-phone"></i>
         </a>
-        <button onclick="openWhatsAppChat()" class="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 border-2 border-white pulse-live" title="WhatsApp 9578169195">
+        <button onclick="openWhatsAppChat()" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xl flex items-center justify-center text-xl sm:text-2xl transition transform hover:scale-110 border-2 border-white pulse-live" title="WhatsApp 9578169195" aria-label="WhatsApp 9578169195">
             <i class="fa-brands fa-whatsapp"></i>
         </button>
     </div>
@@ -2521,15 +2525,19 @@
         // Scroll Observer & Counters
         function initScrollAnimations() {
             const revealEls = document.querySelectorAll('.reveal');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
+            if (window.innerWidth < 1024 || !('IntersectionObserver' in window)) {
+                revealEls.forEach(el => el.classList.add('visible'));
+            } else {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.01, rootMargin: '0px 0px 80px 0px' });
 
-            revealEls.forEach(el => observer.observe(el));
+                revealEls.forEach(el => observer.observe(el));
+            }
 
             // Counter Animation
             const counterSection = document.getElementById('stats-counter-section');
